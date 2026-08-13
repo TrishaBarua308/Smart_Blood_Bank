@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Blood Bank</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 650px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { color: #cc0000; margin-bottom: 25px; }
+        
+        /* 4 Main Menu Buttons */
+        .menu-container { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 30px; flex-wrap: wrap; }
+        .menu-btn { flex: 1; min-width: 130px; padding: 12px 5px; font-size: 13px; font-weight: bold; background-color: #e0e0e0; color: #333; border: none; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+        .menu-btn:hover { background-color: #d5d5d5; }
+        .menu-btn.active { background-color: #cc0000; color: white; }
+        
+        /* Form Sections */
+        .form-section { display: none; background: #ffffff; animation: fadeIn 0.4s ease; }
+        .form-section.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        input, select, button { width: 100%; padding: 12px; margin: 10px 0; box-sizing: border-box; border-radius: 6px; border: 1px solid #ccc; font-size: 15px; }
+        button.action-btn { background-color: #cc0000; color: white; border: none; font-weight: bold; cursor: pointer; }
+        button.action-btn:hover { background-color: #a30000; }
+        
+        /* Profile Card Styling */
+        .profile-card { background: #fdfdfd; border-left: 5px solid #cc0000; padding: 20px; text-align: left; margin-top: 20px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .profile-card h4 { margin: 5px 0; color: #333; }
+
+        table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #cc0000; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🩸 Smart Blood Bank</h1>
+    
+    <div class="menu-container">
+        <button class="menu-btn active" onclick="switchTab('register-section', this)">Become a Donor</button>
+        <button class="menu-btn" onclick="switchTab('search-section', this)">Find Donor</button>
+        <button class="menu-btn" onclick="switchTab('profile-section', this)">My Profile</button>
+        <button class="menu-btn" onclick="switchTab('update-section', this)">Update Profile</button>
+    </div>
+
+    <hr style="border: 0; height: 1px; background: #eee; margin-bottom: 20px;">
+
+    <div id="register-section" class="form-section active">
+        <h3>Become a Blood Donor</h3>
+        <input type="text" id="name" placeholder="Enter Your Name">
+        <select id="blood_group">
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+        </select>
+        <input type="text" id="area" placeholder="Enter Area / City (e.g., Mirpur)">
+        <input type="text" id="phone" placeholder="Enter Phone Number">
+        <button class="action-btn" onclick="registerDonor()">Save to Database</button>
+    </div>
+
+    <div id="search-section" class="form-section">
+        <h3>Find Blood Donor</h3>
+        <select id="search_bg">
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+        </select>
+        <input type="text" id="search_area" placeholder="Enter Area / City to Search">
+        <button class="action-btn" onclick="searchBlood()">Search Database</button>
+
+        <table id="resultTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Group</th>
+                    <th>Area</th>
+                    <th>Phone</th>
+                </tr>
+            </thead>
+            <tbody id="resultBody"></tbody>
+        </table>
+    </div>
+
+    <div id="profile-section" class="form-section">
+        <h3>My Profile</h3>
+        <input type="text" id="profile_phone" placeholder="Enter Your Registered Phone Number">
+        <button class="action-btn" style="background-color: #333;" onclick="viewProfile()">View My Profile</button>
+        
+        <div id="profileCard" class="profile-card" style="display: none;">
+            <h4><strong>Name:</strong> <span id="p_name"></span></h4>
+            <h4><strong>Blood Group:</strong> <span id="p_bg"></span></h4>
+            <h4><strong>Area/City:</strong> <span id="p_area"></span></h4>
+            <h4><strong>Phone:</strong> <span id="p_phone"></span></h4>
+        </div>
+    </div>
+
+    <div id="update-section" class="form-section">
+        <h3>Update Your Profile</h3>
+        <input type="text" id="update_phone" placeholder="Enter Your Registered Phone Number">
+        <input type="text" id="update_name" placeholder="Enter New Name">
+        <input type="text" id="update_area" placeholder="Enter New Area / City">
+        <button class="action-btn" style="background-color: #2b7a78;" onclick="updateDonor()">Update Profile</button>
+    </div>
+
+</div>
+
+<script>
+    function switchTab(sectionId, button) {
+        let sections = document.querySelectorAll('.form-section');
+        sections.forEach(sec => sec.classList.remove('active'));
+        
+        let buttons = document.querySelectorAll('.menu-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        
+        document.getElementById(sectionId).classList.add('active');
+        button.classList.add('active');
+        
+        document.getElementById('resultTable').style.display = 'none';
+        document.getElementById('profileCard').style.display = 'none';
+    }
+
+    function registerDonor() {
+        let name = document.getElementById('name').value;
+        let blood_group = document.getElementById('blood_group').value;
+        let area = document.getElementById('area').value;
+        let phone = document.getElementById('phone').value;
+
+        if(!name || !area || !phone) { alert("Please fill up all fields!"); return; }
+
+        fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, blood_group, area, phone })
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            if(data.status === "success") {
+                document.getElementById('name').value = '';
+                document.getElementById('area').value = '';
+                document.getElementById('phone').value = '';
+            }
+        });
+    }
+
+    function searchBlood() {
+        let bg = document.getElementById('search_bg').value;
+        let area = document.getElementById('search_area').value; 
+
+        if(!area) { alert("Please enter an area to search!"); return; }
+
+        fetch(`/search?blood_group=${encodeURIComponent(bg)}&area=${encodeURIComponent(area)}`)
+        .then(res => res.json())
+        .then(data => {
+            let tbody = document.getElementById('resultBody');
+            tbody.innerHTML = ''; 
+            
+            if(data.length === 0) {
+                alert("No donors found in this area.");
+                document.getElementById('resultTable').style.display = 'none';
+                return;
+            }
+
+            data.forEach(donor => {
+                let row = `<tr><td>${donor.name}</td><td>${donor.blood_group}</td><td>${donor.area}</td><td>${donor.phone}</td></tr>`;
+                tbody.innerHTML += row;
+            });
+            document.getElementById('resultTable').style.display = 'table';
+        });
+    }
+
+    // --- VIEW PROFILE LOGIC ---
+    function viewProfile() {
+        let phone = document.getElementById('profile_phone').value;
+        if(!phone) { alert("Please enter your phone number!"); return; }
+
+        fetch(`/get-profile?phone=${encodeURIComponent(phone)}`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === "error") {
+                alert(data.message);
+                document.getElementById('profileCard').style.display = 'none';
+                return;
+            }
+            
+            // Fill card data
+            document.getElementById('p_name').innerText = data.profile.name;
+            document.getElementById('p_bg').innerText = data.profile.blood_group;
+            document.getElementById('p_area').innerText = data.profile.area;
+            document.getElementById('p_phone').innerText = data.profile.phone;
+            
+            document.getElementById('profileCard').style.display = 'block';
+        });
+    }
+
+    function updateDonor() {
+        let phone = document.getElementById('update_phone').value;
+        let name = document.getElementById('update_name').value;
+        let area = document.getElementById('update_area').value;
+
+        if(!phone || !name || !area) { alert("Please fill up all fields to update!"); return; }
+
+        fetch('/update', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, name, area })
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            if(data.status === "success") {
+                document.getElementById('update_phone').value = '';
+                document.getElementById('update_name').value = '';
+                document.getElementById('update_area').value = '';
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
