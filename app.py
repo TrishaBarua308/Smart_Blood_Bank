@@ -3,7 +3,7 @@ import sqlite3
 
 app = Flask(__name__)
 
-# --- DATABASE SETUP (SQL) ---
+# SQL
 def init_db():
     conn = sqlite3.connect('blood_bank.db')
     cursor = conn.cursor()
@@ -21,7 +21,7 @@ def init_db():
 
 init_db()
 
-# --- ROUTES ---
+
 
 @app.route('/')
 def home():
