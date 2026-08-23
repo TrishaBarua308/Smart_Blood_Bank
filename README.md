@@ -17,5 +17,5 @@ A lightweight, full-stack web application built with Python Flask, SQLite and HT
 
 1. Clone the repository:
    ```bash
-   git clone <YOUR_GITHUB_REPOSITORY_URL>
+   git clone <https://github.com/TrishaBarua308/Smart_Blood_Bank>
    cd Smart_Blood_Bank
